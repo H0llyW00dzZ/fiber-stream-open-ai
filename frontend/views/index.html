@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Stream</title>
+</head>
+<body>
+    <h1>OpenAI Streaming</h1>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        fetch('/stream')
+            .then(response => {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                function read() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            console.log("Stream complete");
+                            return;
+                        }
+
+                        buffer += decoder.decode(value, { stream: true });
+                        let lines = buffer.split('\n');
+
+                        // Keep the last line in the buffer if it's incomplete
+                        buffer = lines.pop();
+
+                        lines.forEach(line => {
+                            if (line.startsWith('data: ')) {
+                                const content = line.substring(6).trim();
+                                if (content) {
+                                    output.innerHTML += content + ' ';
+                                }
+                            }
+                        });
+
+                        read();
+                    });
+                }
+
+                read();
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
