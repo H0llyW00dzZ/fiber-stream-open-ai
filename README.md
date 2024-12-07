@@ -13,8 +13,8 @@ The application serves a web page where users can initiate a chat with an AI ass
 
 ## Project Structure
 
-- **main.go**: Entry point of the application, sets up routes and handles server lifecycle.
-- **views/**: Contains HTML templates for rendering the web interface.
+- **cmd/server/run.go**: Entry point of the application, sets up routes and handles server lifecycle.
+- **frontend/views/**: Contains HTML templates for rendering the web interface.
 - **ai/openai/**: Contains the client implementation for interacting with the OpenAI API.
 
 ## Key Functions
