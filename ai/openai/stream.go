@@ -66,6 +66,9 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 
 	req.SetRequestURI("https://api.openai.com/v1/chat/completions")
 	req.Header.SetMethod("POST")
+	// Note: Using the content-type text/event-stream with OpenAI may not work anymore.
+	// If it still works, it can be more challenging to manage.
+	// JSON is preferred because it's easier to stream back to the client and can be improved due to its implementation in Go.
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", ai.APIKey))
 	req.SetBody(reqBytes)
