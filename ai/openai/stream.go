@@ -43,6 +43,8 @@ type ChatCompletionsStreamResponse struct {
 
 // StreamChatCompletion handles streaming chat completions from the OpenAI API.
 // It sends a POST request to the OpenAI API and streams the response back to the client.
+//
+// Note: This is just an example. If you have your own AI, it's much easier to create own SDK written in Go for this SSE.
 func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	reqBody := map[string]any{
 		"model": "gpt-4o",
@@ -72,8 +74,7 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	defer fasthttp.ReleaseResponse(resp)
 
 	clientHTTP := &fasthttp.Client{}
-	err = clientHTTP.Do(req, resp)
-	if err != nil {
+	if err = clientHTTP.Do(req, resp); err != nil {
 		log.Printf("Request failed: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Request failed")
 	}
@@ -82,6 +83,7 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 		return c.Status(resp.StatusCode()).SendString(string(resp.Body()))
 	}
 
+	// Note: This is just an example and needs improvement for production use.
 	c.Set("Content-Type", "text/event-stream")
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
