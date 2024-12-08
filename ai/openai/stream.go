@@ -91,6 +91,8 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	c.Set("Cache-Control", "no-cache")
 	c.Set("Connection", "keep-alive")
 
+	// Note: Handling the OpenAI stream response with resp.BodyStream in FastHTTP is not possible,
+	// as it will always return nil due to differences in how streaming works.
 	body := resp.Body()
 	reader := bufio.NewReader(strings.NewReader(string(body)))
 
