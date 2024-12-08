@@ -3,8 +3,8 @@
 // By accessing or using this software, you agree to be bound by the terms
 // of the License Agreement, which you can find at LICENSE files.
 
-//go:build !json_sonic
-// +build !json_sonic
+//go:build json_sonic
+// +build json_sonic
 
 package openai
 
@@ -16,10 +16,24 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"sync"
 
+	"github.com/bytedance/sonic/decoder"
+	"github.com/bytedance/sonic/encoder"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/valyala/fasthttp"
+)
+
+// Decoder pool for Sonic
+//
+// Note: This improves performance by reducing latency.
+var (
+	decoderPool = sync.Pool{
+		New: func() any {
+			return decoder.NewStreamDecoder(nil)
+		},
+	}
 )
 
 // Client represents a client to interact with the OpenAI API.
@@ -60,7 +74,7 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 		"Can you help me with a math problem?",
 	}
 
-	// Select a random message using crypto/rand
+	// Select a random message using [crypto/rand]
 	index, err := rand.Int(rand.Reader, big.NewInt(int64(len(userMessages))))
 	if err != nil {
 		log.Printf("Failed to generate random index: %v", err)
@@ -77,8 +91,11 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 		"stream": true,
 	}
 
-	reqBytes, err := c.App().Config().JSONEncoder(reqBody)
-	if err != nil {
+	var reqBytes strings.Builder
+	// Create a new encoder
+	enc := encoder.NewStreamEncoder(&reqBytes)
+
+	if err := enc.Encode(reqBody); err != nil {
 		log.Printf("Failed to encode request body: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to encode request body")
 	}
@@ -93,13 +110,13 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	// JSON is preferred because it's easier to stream back to the client and can be improved due to its implementation in Go.
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", ai.APIKey))
-	req.SetBody(reqBytes)
+	req.SetBodyString(reqBytes.String())
 
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
 	clientHTTP := &fasthttp.Client{}
-	if err = clientHTTP.Do(req, resp); err != nil {
+	if err := clientHTTP.Do(req, resp); err != nil {
 		log.Printf("Request failed: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Request failed")
 	}
@@ -116,6 +133,11 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	// Note: Handling the OpenAI stream response with resp.BodyStream in FastHTTP is not possible,
 	// as it will always return nil due to differences in how streaming works.
 	body := resp.Body()
+	if body == nil {
+		log.Println("Response body is nil")
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to read response body")
+	}
+
 	reader := bufio.NewReader(strings.NewReader(string(body)))
 
 	c.Context().Response.SetBodyStreamWriter(func(w *bufio.Writer) {
@@ -141,7 +163,12 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 				line = strings.TrimPrefix(line, "data: ")
 
 				var streamResponse ChatCompletionsStreamResponse
-				if err := c.App().Config().JSONDecoder([]byte(line), &streamResponse); err != nil {
+				// Acquire a decoder from the pool
+				dec := decoderPool.Get().(*decoder.StreamDecoder)
+
+				// Reset with string value
+				dec.Reset(line)
+				if err := dec.Decode(&streamResponse); err != nil {
 					log.Printf("Error parsing JSON: %v", err)
 					continue
 				}
