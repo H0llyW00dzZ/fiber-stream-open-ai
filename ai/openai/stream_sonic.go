@@ -133,10 +133,6 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	// Note: Handling the OpenAI stream response with resp.BodyStream in FastHTTP is not possible,
 	// as it will always return nil due to differences in how streaming works.
 	body := resp.Body()
-	if body == nil {
-		log.Println("Response body is nil")
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to read response body")
-	}
 
 	reader := bufio.NewReader(strings.NewReader(string(body)))
 
