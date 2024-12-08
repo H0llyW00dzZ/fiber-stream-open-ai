@@ -1,6 +1,6 @@
 # Fiber Stream Example
 
-This repository demonstrates a simple implementation of a streaming chat application using the Fiber web framework and the OpenAI API.
+This repository demonstrates a simple implementation of a streaming chat application using the Fiber web framework, built on top of FastHTTP, and the OpenAI API.
 
 ## Overview
 
@@ -10,6 +10,7 @@ The application serves a web page where users can initiate a chat with an AI ass
 
 - **HTML Template Rendering**: Uses Fiber's HTML template engine to render the interface.
 - **Streaming API Integration**: Connects to the OpenAI API to stream chat responses.
+- **FastHTTP Performance**: Leverages FastHTTP for high-performance HTTP handling.
 
 ## Project Structure
 
@@ -25,4 +26,5 @@ The application serves a web page where users can initiate a chat with an AI ass
 ## Acknowledgments
 
 - [Fiber](https://gofiber.io/) for the web framework.
+- [FastHTTP](https://github.com/valyala/fasthttp) for high-performance HTTP handling.
 - [OpenAI](https://openai.com/) for the API services.
