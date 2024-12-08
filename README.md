@@ -6,6 +6,9 @@ This repository demonstrates a simple implementation of a streaming chat applica
 
 The application serves a web page where users can initiate a chat with an AI assistant. It uses Fiber to handle HTTP requests and streams responses from the OpenAI API to the client.
 
+> [!NOTE]
+> This example requires further improvements, such as `reducing latency`, if used in `production`
+
 ## Features
 
 - **HTML Template Rendering**: Uses Fiber's HTML template engine to render the interface.
@@ -28,6 +31,13 @@ The application serves a web page where users can initiate a chat with an AI ass
 
 - **Performance Enhancement**: Sonic is used for JSON encoding and decoding, which enhances performance by utilizing a pool of decoders and encoders.
 - **Stream Handling**: The use of Sonic's `StreamDecoder` and `StreamEncoder` allows for efficient processing of streaming data, minimizing overhead.
+
+## Compatibility
+
+- [**Kubernetes**](https://kubernetes.io/): Supports Horizontal Pod Autoscaler (HPA) when using external AI services. For an in-house AI solution (`e.g., own AI`), consider using Vertical Pod Autoscaler (VPA) for resource management.
+
+> [!NOTE]
+> It also depends on the ingress configuration. If you have extensive Kubernetes knowledge (e.g., a Captain Kubernetes), it can be managed easily
 
 ## Acknowledgments
 
