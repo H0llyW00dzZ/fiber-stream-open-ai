@@ -66,6 +66,8 @@ type ChatCompletionsStreamResponse struct {
 // Note: This is just an example. If you have your own AI, it's much easier to create own SDK written in Go for this SSE.
 func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	// List of random user messages
+	//
+	// Note: This is just an example to simulate user requests. In production, these messages would come from the user's request body.
 	userMessages := []string{
 		"Hello!",
 		"How's the weather today?",
