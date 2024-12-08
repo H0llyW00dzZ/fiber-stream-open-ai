@@ -34,10 +34,10 @@ The application serves a web page where users can initiate a chat with an AI ass
 
 ## Compatibility
 
-- [**Kubernetes**](https://kubernetes.io/): Supports Horizontal Pod Autoscaler (HPA) when using external AI services. For an in-house AI solution (`e.g., own AI`), consider using Vertical Pod Autoscaler (VPA) for resource management.
+- [**Kubernetes**](https://kubernetes.io/): Supports Horizontal Pod Autoscaler (HPA) when using external AI services (`e.g., the current example implementation that interacts with OpenAI`). For an in-house AI solution (`e.g., own AI`), consider using Vertical Pod Autoscaler (VPA) for resource management.
 
 > [!NOTE]
-> It also depends on the ingress configuration. If you have extensive Kubernetes knowledge (e.g., a Captain Kubernetes), it can be managed easily
+> It also depends on the ingress configuration. If you have extensive Kubernetes knowledge (`e.g., a Captain Kubernetes`), it can be managed easily
 
 ## Acknowledgments
 
