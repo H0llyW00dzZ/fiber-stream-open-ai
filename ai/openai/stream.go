@@ -129,9 +129,10 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	}
 
 	// Note: This is just an example and needs improvement for production use.
-	c.Set("Content-Type", "text/event-stream")
-	c.Set("Cache-Control", "no-cache")
-	c.Set("Connection", "keep-alive")
+	c.Set(fiber.HeaderContentType, "text/event-stream")
+	c.Set(fiber.HeaderCacheControl, "no-cache")
+	c.Set(fiber.HeaderConnection, "keep-alive")
+	c.Set(fiber.HeaderXPoweredBy, "SSE AI Fiber Framework")
 
 	// Note: Handling the OpenAI stream response with resp.BodyStream in FastHTTP is not possible,
 	// as it will always return nil due to differences in how streaming works.
