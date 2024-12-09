@@ -3,8 +3,8 @@
 // By accessing or using this software, you agree to be bound by the terms
 // of the License Agreement, which you can find at LICENSE files.
 
-//go:build !json_sonic
-// +build !json_sonic
+//go:build json_sonic
+// +build json_sonic
 
 package main
 
@@ -16,6 +16,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 )
@@ -31,6 +32,8 @@ func main() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  30 * time.Second,
+		JSONEncoder:  sonic.Marshal,
+		JSONDecoder:  sonic.Unmarshal,
 	})
 
 	client := openai.NewClient()

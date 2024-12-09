@@ -3,8 +3,8 @@
 // By accessing or using this software, you agree to be bound by the terms
 // of the License Agreement, which you can find at LICENSE files.
 
-//go:build !json_sonic
-// +build !json_sonic
+//go:build !streamjson_sonic
+// +build !streamjson_sonic
 
 package openai
 
@@ -16,6 +16,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/joho/godotenv/autoload"
@@ -100,7 +101,22 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
-	clientHTTP := &fasthttp.Client{}
+	clientHTTP := &fasthttp.Client{
+		// Reuse connections to improve performance
+		MaxConnsPerHost: 100,
+
+		// Set timeouts to prevent hanging connections
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+
+		// Optimize buffer sizes
+		MaxIdleConnDuration: 30 * time.Second,
+		MaxConnDuration:     30 * time.Minute,
+
+		// Reduce buffer size for headers if needed
+		MaxResponseBodySize: 2 * 1024 * 1024,
+	}
+
 	if err = clientHTTP.Do(req, resp); err != nil {
 		log.Printf("Request failed: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Request failed")

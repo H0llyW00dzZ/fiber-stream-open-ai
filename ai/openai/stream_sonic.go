@@ -3,8 +3,8 @@
 // By accessing or using this software, you agree to be bound by the terms
 // of the License Agreement, which you can find at LICENSE files.
 
-//go:build json_sonic
-// +build json_sonic
+//go:build streamjson_sonic
+// +build streamjson_sonic
 
 package openai
 
@@ -17,6 +17,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bytedance/sonic/decoder"
 	"github.com/bytedance/sonic/encoder"
@@ -28,6 +29,7 @@ import (
 // Decoder pool for Sonic
 //
 // Note: This improves performance by reducing latency.
+// However, ensure the implementation is complete for it to function correctly 🤪.
 var (
 	decoderPool = sync.Pool{
 		New: func() any {
@@ -117,7 +119,22 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
-	clientHTTP := &fasthttp.Client{}
+	clientHTTP := &fasthttp.Client{
+		// Reuse connections to improve performance
+		MaxConnsPerHost: 100,
+
+		// Set timeouts to prevent hanging connections
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+
+		// Optimize buffer sizes
+		MaxIdleConnDuration: 5 * time.Minute,
+		MaxConnDuration:     10 * time.Minute,
+
+		// Reduce buffer size for headers if needed
+		MaxResponseBodySize: 2 * 1024 * 1024,
+	}
+
 	if err := clientHTTP.Do(req, resp); err != nil {
 		log.Printf("Request failed: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Request failed")
