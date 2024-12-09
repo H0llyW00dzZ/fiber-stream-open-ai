@@ -40,6 +40,8 @@ func NewClient() *Client {
 
 // ChatCompletionsStreamResponse represents the structure of a streaming response from the OpenAI API.
 type ChatCompletionsStreamResponse struct {
+	ID      string `json:"id"`
+	Created int64  `json:"created"`
 	Choices []struct {
 		Delta struct {
 			Content string `json:"content"`
@@ -164,10 +166,14 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 					continue
 				}
 
+				// This should now correctly display a MIME type of text/event-stream in the browser.
+				createdTime := time.Unix(streamResponse.Created, 0).Format("2006-01-02 15:04:05")
 				for _, choice := range streamResponse.Choices {
 					content := choice.Delta.Content
 					if content != "" {
 						fullMessage.WriteString(content)
+						w.WriteString(fmt.Sprintf("id: %s\n", streamResponse.ID))
+						w.WriteString(fmt.Sprintf("time: %s\n", createdTime))
 						w.WriteString(fmt.Sprintf("data: %s\n\n", content))
 						w.Flush()
 					}
