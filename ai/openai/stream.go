@@ -111,7 +111,7 @@ func (ai *Client) StreamChatCompletion(c *fiber.Ctx) error {
 
 		// Optimize buffer sizes
 		MaxIdleConnDuration: 30 * time.Second,
-		MaxConnDuration:     30 * time.Minute,
+		MaxConnDuration:     30 * time.Second,
 
 		// Reduce buffer size for headers if needed
 		MaxResponseBodySize: 2 * 1024 * 1024,
