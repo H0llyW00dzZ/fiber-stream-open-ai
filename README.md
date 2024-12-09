@@ -39,6 +39,9 @@ The application serves a web page where users can initiate a chat with an AI ass
 > [!NOTE]
 > It also depends on the ingress configuration. If you have extensive Kubernetes knowledge (`e.g., a Captain Kubernetes`), it can be managed easily
 
+> [!TIP]
+> For Horizontal Pod Autoscaler (HPA), it's recommended to use custom metrics based on connections instead of the default `CPU/Memory` metrics. This approach can help achieve scalability, such as reaching up to 1000 nodes to handle 1 billion connections.
+
 ## Acknowledgments
 
 - [Fiber](https://gofiber.io/) for the web framework.
